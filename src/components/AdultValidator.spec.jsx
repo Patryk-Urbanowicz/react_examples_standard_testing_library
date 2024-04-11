@@ -51,4 +51,95 @@ describe('AdultValidator', () => {
     // then
     expect(container).toBeEmptyDOMElement();
   });
+
+  it('should show only for adults when age is between min and 18', async () => {
+    //given
+    render(<AdultValidator min={15}/>);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, '17');
+
+    //then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('This page is available only for adult people');
+  });
+
+  it('should show you are grown up when age is between 18 and max', async () => {
+    //given
+    render(<AdultValidator/>);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, '60');
+
+    //then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('You are grown up!');
+  });
+
+  it('should show proper message when age is equal min', async () => {
+    //given
+    render(<AdultValidator min={4}/>);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, '4');
+
+    //then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('This page is available only for adult people');
+  });
+
+  it('should show proper message when age is equal max', async () => {
+    //given
+    render(<AdultValidator max={2137}/>);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, '2137');
+
+    //then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('You are grown up');
+  });
+
+  it('should not be able to enter negative age', async () => {
+    //given
+    render(<AdultValidator />);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, '-80');
+
+    //then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('You are grown up');
+  });
+
+  it('should only be able to enter numbers as age', async () => {
+    //given
+    render(<AdultValidator />);
+    const input = screen.getByRole('textbox', {name: "Put your age here"});
+
+    //when
+    await userEvent.type(input, 'Naleśnik');
+
+    //then
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+  });
+
+  it('should show TOO OLD alert after entering value smaller than min', async () => {
+    // given
+    render(<AdultValidator />);
+    const input = screen.getByRole('textbox', { name: 'Put your age here' });
+
+    // when
+    await userEvent.type(input, '2137');
+
+    // then
+    const alertBox = await screen.findByRole('alert');
+    expect(alertBox).toHaveTextContent('Are you really so old?');
+  });
+
 });
